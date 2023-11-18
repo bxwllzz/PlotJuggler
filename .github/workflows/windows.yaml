@@ -15,7 +15,6 @@ jobs:
     env:
       CXXFLAGS: /MP
       VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
-      CMAKE_TOOLCHAIN: "C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
 
     steps:
       - name: Export GitHub Actions cache environment variables
@@ -46,7 +45,7 @@ jobs:
       - name: Build Plotjuggler
         shell: pwsh
         run: >
-          cmake -Ax64 -T host=x64 -B build -DCMAKE_TOOLCHAIN_FILE=$CMAKE_TOOLCHAIN -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=RelWithDebInfo PlotJuggler;
+          cmake -Ax64 -T host=x64 -B build -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=RelWithDebInfo PlotJuggler;
           cmake --build build --config RelWithDebInfo --target install
           
       - uses: actions/upload-artifact@v1
