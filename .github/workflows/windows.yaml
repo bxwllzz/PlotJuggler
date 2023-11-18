@@ -16,8 +16,8 @@ jobs:
       CXXFLAGS: /MP
       VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
       SCCACHE_GHA_ENABLED: "true"
-      CMAKE_C_COMPILER_LAUNCHER: "sccache"
-      CMAKE_CXX_COMPILER_LAUNCHER: "sccache"
+      CMAKE_C_COMPILER_LAUNCHER: sccache
+      CMAKE_CXX_COMPILER_LAUNCHER: sccache
       VCPKG_KEEP_ENV_VARS: "CMAKE_C_COMPILER_LAUNCHER;CMAKE_CXX_COMPILER_LAUNCHER"
 
     steps:
@@ -49,12 +49,16 @@ jobs:
           dir: '${{ github.workspace }}/qt_installation/'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
 
+      - name: Config Plotjuggler
+        shell: pwsh
+        run: >
+          cmake -Ax64 -T host=x64 -B build -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache PlotJuggler;
+  
       - name: Build Plotjuggler
         shell: pwsh
         run: >
-          cmake -Ax64 -T host=x64 -B build -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=RelWithDebInfo PlotJuggler;
           cmake --build build --config RelWithDebInfo --target install
-          
+         
       - uses: actions/upload-artifact@v1
         with:
           name: install-${{ matrix.windows-version }}
