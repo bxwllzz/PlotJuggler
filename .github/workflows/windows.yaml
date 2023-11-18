@@ -14,8 +14,17 @@ jobs:
           - 'windows-latest'
     env:
       CXXFLAGS: /MP
+      VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
+      CMAKE_TOOLCHAIN: "C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
 
     steps:
+      - name: Export GitHub Actions cache environment variables
+        uses: actions/github-script@v6
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+            
       - name: Sync repository
         uses: actions/checkout@v2
         
@@ -37,8 +46,8 @@ jobs:
       - name: Build Plotjuggler
         shell: pwsh
         run: >
-          cmake -Ax64 -T host=x64 -B build -DCMAKE_INSTALL_PREFIX=install PlotJuggler;
-          cmake --build build --target install
+          cmake -Ax64 -T host=x64 -B build -DCMAKE_TOOLCHAIN_FILE=%CMAKE_TOOLCHAIN% -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=RelWithDebInfo PlotJuggler;
+          cmake --build build --config RelWithDebInfo --target install
           
       - uses: actions/upload-artifact@v1
         with:
