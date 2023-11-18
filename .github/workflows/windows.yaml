@@ -15,6 +15,10 @@ jobs:
     env:
       CXXFLAGS: /MP
       VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
+      SCCACHE_GHA_ENABLED: "true"
+      CMAKE_C_COMPILER_LAUNCHER: "sccache"
+      CMAKE_CXX_COMPILER_LAUNCHER: "sccache"
+      VCPKG_KEEP_ENV_VARS: "CMAKE_C_COMPILER_LAUNCHER;CMAKE_CXX_COMPILER_LAUNCHER"
 
     steps:
       - name: Export GitHub Actions cache environment variables
@@ -23,6 +27,9 @@ jobs:
           script: |
             core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
             core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+      - name: Run sccache-cache
+        uses: mozilla-actions/sccache-action@v0.0.3
             
       - name: Sync repository
         uses: actions/checkout@v2
