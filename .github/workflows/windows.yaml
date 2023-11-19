@@ -56,10 +56,10 @@ jobs:
           move /Y Qt5*.dll backup_Qt
           cd C:\opt\ros\noetic\x64\include
           mkdir backup_Qt
-          for /D %F in (Qt*) do move /Y "%F" "backup_Qt\%~nxF"
+          for /D %%F in (Qt*) do move /Y "%%F" "backup_Qt\%%~nxF"
           cd C:\opt\ros\noetic\x64\share\cmake
           mkdir backup_Qt
-          for /D %F in (Qt*) do move /Y "%F" "backup_Qt\%~nxF"
+          for /D %%F in (Qt*) do move /Y "%%F" "backup_Qt\%%~nxF"
 
       - name: Test ROS workspace
         shell: cmd
