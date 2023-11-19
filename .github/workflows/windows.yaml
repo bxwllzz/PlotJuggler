@@ -12,13 +12,10 @@ jobs:
         windows-version:
           - 'windows-2019'
           - 'windows-latest'
+        ROSDISTRO: [noetic]
     env:
       CXXFLAGS: /MP
       VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
-      SCCACHE_GHA_ENABLED: "true"
-      CMAKE_C_COMPILER_LAUNCHER: sccache
-      CMAKE_CXX_COMPILER_LAUNCHER: sccache
-      VCPKG_KEEP_ENV_VARS: "CMAKE_C_COMPILER_LAUNCHER;CMAKE_CXX_COMPILER_LAUNCHER"
 
     steps:
       - name: Export GitHub Actions cache environment variables
@@ -27,10 +24,56 @@ jobs:
           script: |
             core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
             core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+          
+      - name: Restore cached ROS
+        id: cache-ros-restore
+        uses: actions/cache/restore@v3
+        with:
+          path: C:\opt
+          key: ${{ matrix.windows-version }}-ros-${{ matrix.ROSDISTRO }}
 
-      - name: Run sccache-cache
-        uses: mozilla-actions/sccache-action@v0.0.3
-            
+      - name: Install ROS
+        shell: cmd
+        if: steps.cache-ros-restore.outputs.cache-hit != 'true'
+        run: |
+          choco sources add -n=roswin -s https://aka.ms/ros/public --priority 1
+          choco install ros-%ROSDISTRO%-desktop_full -y --no-progress
+        env:
+          ROSDISTRO: ${{ matrix.ROSDISTRO }}
+      
+      - name: Save ROS
+        id: cache-ros-save
+        uses: actions/cache/save@v3
+        with:
+          path: C:\opt
+          key: ${{ steps.cache-ros-restore.outputs.cache-primary-key }}
+
+      - name: Remove Qt in ROS
+        shell: cmd
+        run: |
+          cd C:\opt\ros\noetic\x64\bin
+          mkdir backup_Qt
+          move /Y Qt5*.dll backup_Qt
+          cd C:\opt\ros\noetic\x64\include
+          mkdir backup_Qt
+          for /D %F in (Qt*) do move /Y "%F" "backup_Qt\%~nxF"
+          cd C:\opt\ros\noetic\x64\share\cmake
+          mkdir backup_Qt
+          for /D %F in (Qt*) do move /Y "%F" "backup_Qt\%~nxF"
+
+      - name: Test ROS workspace
+        shell: cmd
+        run: |
+          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat" -arch=amd64 -host_arch=amd64
+          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" -arch=amd64 -host_arch=amd64
+          call "C:\opt\ros\%ROSDISTRO%\x64\setup.bat"
+          mkdir ros_ws
+          cd ros_ws
+          mkdir src
+          catkin_make
+        env:
+          ROSDISTRO: ${{ matrix.ROSDISTRO }}
+
       - name: Sync repository
         uses: actions/checkout@v2
         
@@ -52,7 +95,7 @@ jobs:
       - name: Config Plotjuggler
         shell: pwsh
         run: >
-          cmake -Ax64 -T host=x64 -B build -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache PlotJuggler;
+          cmake -Ax64 -T host=x64 -B build -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=RelWithDebInfo PlotJuggler;
   
       - name: Build Plotjuggler
         shell: pwsh
