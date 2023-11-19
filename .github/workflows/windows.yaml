@@ -103,7 +103,14 @@ jobs:
         run: >
           cmake --build build --config RelWithDebInfo --target install
          
-      - uses: actions/upload-artifact@v1
+      - name: Upload build
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-${{ matrix.windows-version }}
+          path: build
+         
+      - name: Upload install
+        uses: actions/upload-artifact@v3
         with:
           name: install-${{ matrix.windows-version }}
           path: install
