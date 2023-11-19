@@ -63,7 +63,8 @@ if(catkin_FOUND)
 
 message(STATUS ${catkin_INCLUDE_DIRS})
 
-    include_directories(${catkin_INCLUDE_DIRS})
+    # Include and link to ROS libraries at last.
+    # Because ROS in Windows contains libraries with incompatible version
     add_definitions(-DCOMPILED_WITH_CATKIN)
 
 elseif(ament_cmake_FOUND)
@@ -208,6 +209,12 @@ target_include_directories(plotjuggler_base INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
   $<INSTALL_INTERFACE:include>
 )
+
+if(COMPILING_WITH_CATKIN)
+    # Include and link to ROS libraries at last.
+    # Because ROS in Windows contains libraries with incompatible version
+    include_directories(${catkin_INCLUDE_DIRS})
+endif()
 
 #########################  INSTALL  ####################################
 
