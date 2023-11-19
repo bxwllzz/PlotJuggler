@@ -42,7 +42,7 @@ jobs:
           ROSDISTRO: ${{ matrix.ROSDISTRO }}
       
       - name: Save ROS
-        id: cache-ros-save
+        if: steps.cache-ros-restore.outputs.cache-hit != 'true'
         uses: actions/cache/save@v3
         with:
           path: C:\opt
@@ -61,22 +61,6 @@ jobs:
           mkdir backup_Qt
           for /D %%F in (Qt*) do move /Y "%%F" "backup_Qt\%%~nxF"
           exit /B 0
-
-      - name: Test ROS workspace
-        shell: cmd
-        run: |
-          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat" -arch=amd64 -host_arch=amd64
-          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" -arch=amd64 -host_arch=amd64
-          call "C:\opt\ros\%ROSDISTRO%\x64\setup.bat"
-          mkdir ros_ws
-          cd ros_ws
-          mkdir src
-          catkin_make
-        env:
-          ROSDISTRO: ${{ matrix.ROSDISTRO }}
-
-      - name: Sync repository
-        uses: actions/checkout@v2
         
       - name: Cache Qt
         id: cache-qt
@@ -93,20 +77,47 @@ jobs:
           dir: '${{ github.workspace }}/qt_installation/'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
 
-      - name: Config Plotjuggler
-        shell: pwsh
-        run: >
-          cmake -Ax64 -T host=x64 -B build -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=RelWithDebInfo PlotJuggler;
+      - name: Test ROS workspace
+        shell: cmd
+        run: |
+          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat" -arch=amd64 -host_arch=amd64
+          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" -arch=amd64 -host_arch=amd64
+          call "C:\opt\ros\%ROSDISTRO%\x64\setup.bat"
+          mkdir src
+          catkin_make
+        env:
+          ROSDISTRO: ${{ matrix.ROSDISTRO }}
+
+      - name: Sync repository
+        uses: actions/checkout@v2
+        with:
+          path: 'src/Plotjuggler'
+
+      - name: Build with ROS
+        shell: cmd
+        run: |
+          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat" -arch=amd64 -host_arch=amd64
+          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" -arch=amd64 -host_arch=amd64
+          call "C:\opt\ros\%ROSDISTRO%\x64\setup.bat"
+          catkin_make
+        env:
+          ROSDISTRO: ${{ matrix.ROSDISTRO }}
+
+      # - name: Config Plotjuggler
+      #   shell: pwsh
+      #   run: >
+      #     cmake -Ax64 -T host=x64 -B build -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=RelWithDebInfo PlotJuggler;
   
-      - name: Build Plotjuggler
-        shell: pwsh
-        run: >
-          cmake --build build --config RelWithDebInfo --target install
+      # - name: Build Plotjuggler
+      #   shell: pwsh
+      #   run: >
+      #     cmake --build build --config RelWithDebInfo --target install
 
       - name: Compress workspace
         shell: cmd
         run: |
           "C:/Program Files/7-Zip/7z.exe" a -t7z -mx9 build.7z build
+          "C:/Program Files/7-Zip/7z.exe" a -t7z -mx9 devel.7z devel
           "C:/Program Files/7-Zip/7z.exe" a -t7z -mx9 install.7z install
          
       - name: Upload build
@@ -114,6 +125,12 @@ jobs:
         with:
           name: build-${{ matrix.windows-version }}
           path: build.7z
+          
+      - name: Upload devel
+        uses: actions/upload-artifact@v3
+        with:
+          name: devel-${{ matrix.windows-version }}
+          path: devel.7z
          
       - name: Upload install
         uses: actions/upload-artifact@v3
