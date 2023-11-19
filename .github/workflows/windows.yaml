@@ -119,7 +119,7 @@ jobs:
         run: |
           "C:/Program Files/7-Zip/7z.exe" a -t7z -mx9 build.7z build
           "C:/Program Files/7-Zip/7z.exe" a -t7z -mx9 devel.7z devel
-          # "C:/Program Files/7-Zip/7z.exe" a -t7z -mx9 install.7z install
+        # "C:/Program Files/7-Zip/7z.exe" a -t7z -mx9 install.7z install
          
       - name: Upload build
         uses: actions/upload-artifact@v3
