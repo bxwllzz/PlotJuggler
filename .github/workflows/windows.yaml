@@ -102,15 +102,21 @@ jobs:
         shell: pwsh
         run: >
           cmake --build build --config RelWithDebInfo --target install
+
+      - name: Compress workspace
+        shell: cmd
+        run: |
+          "C:/Program Files/7-Zip/7z.exe" a -t7z -mx9 build.7z build
+          "C:/Program Files/7-Zip/7z.exe" a -t7z -mx9 install.7z install
          
       - name: Upload build
         uses: actions/upload-artifact@v3
         with:
           name: build-${{ matrix.windows-version }}
-          path: build
+          path: build.7z
          
       - name: Upload install
         uses: actions/upload-artifact@v3
         with:
           name: install-${{ matrix.windows-version }}
-          path: install
+          path: install.7z
