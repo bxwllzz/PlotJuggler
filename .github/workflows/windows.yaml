@@ -51,6 +51,7 @@ jobs:
       - name: Remove Qt in ROS
         shell: cmd
         run: |
+          C:
           cd C:\opt\ros\noetic\x64\bin
           mkdir backup_Qt
           move /Y Qt5*.dll backup_Qt
@@ -99,7 +100,7 @@ jobs:
           call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat" -arch=amd64 -host_arch=amd64
           call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" -arch=amd64 -host_arch=amd64
           call "C:\opt\ros\%ROSDISTRO%\x64\setup.bat"
-          catkin_make
+          catkin_make -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_EXPORT_COMPILE_COMMANDS=true
         env:
           ROSDISTRO: ${{ matrix.ROSDISTRO }}
 
