@@ -60,6 +60,7 @@ jobs:
           cd C:\opt\ros\noetic\x64\share\cmake
           mkdir backup_Qt
           for /D %%F in (Qt*) do move /Y "%%F" "backup_Qt\%%~nxF"
+          exit /B 0
 
       - name: Test ROS workspace
         shell: cmd
