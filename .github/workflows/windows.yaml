@@ -97,13 +97,13 @@ jobs:
       - name: Sync repository bxwllzz/plotjuggler-ros-plugins
         uses: actions/checkout@v4
         with:
-          repo: 'https://github.com/bxwllzz/plotjuggler-ros-plugins.git'
+          repository: 'https://github.com/bxwllzz/plotjuggler-ros-plugins.git'
           path: 'src/plotjuggler-ros-plugins'
 
-      - name: Sync repository plotjuggler_msgs
+      - name: Sync repository bxwllzz/plotjuggler_msgs
         uses: actions/checkout@v4
         with:
-          repo: 'https://github.com/PlotJuggler/plotjuggler_msgs.git'
+          repository: 'https://github.com/bxwllzz/plotjuggler_msgs.git'
           path: 'src/plotjuggler_msgs'
 
       - name: Build with ROS
