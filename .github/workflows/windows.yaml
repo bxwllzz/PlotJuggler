@@ -94,6 +94,18 @@ jobs:
         with:
           path: 'src/Plotjuggler'
 
+      - name: Sync repository bxwllzz/plotjuggler-ros-plugins
+        uses: actions/checkout@v4
+        with:
+          repo: 'https://github.com/bxwllzz/plotjuggler-ros-plugins.git'
+          path: 'src/plotjuggler-ros-plugins'
+
+      - name: Sync repository plotjuggler_msgs
+        uses: actions/checkout@v4
+        with:
+          repo: 'https://github.com/PlotJuggler/plotjuggler_msgs.git'
+          path: 'src/plotjuggler_msgs'
+
       - name: Build with ROS
         shell: cmd
         run: |
@@ -119,22 +131,13 @@ jobs:
         run: |
           "C:/Program Files/7-Zip/7z.exe" a -t7z -mx9 build.7z build
           "C:/Program Files/7-Zip/7z.exe" a -t7z -mx9 devel.7z devel
+          "C:/Program Files/7-Zip/7z.exe" a -t7z -mx9 ros-bin.7z C:\opt\ros\%ROSDISTRO%\x64\bin
+          "C:/Program Files/7-Zip/7z.exe" a -t7z -mx9 Qt-bin.7z %Qt5_Dir%\bin
         # "C:/Program Files/7-Zip/7z.exe" a -t7z -mx9 install.7z install
          
-      - name: Upload build
+      - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: build-${{ matrix.windows-version }}
-          path: build.7z
+          name: artifact-${{ matrix.windows-version }}
+          path: "*.7z"
           
-      - name: Upload devel
-        uses: actions/upload-artifact@v3
-        with:
-          name: devel-${{ matrix.windows-version }}
-          path: devel.7z
-         
-      - name: Upload install
-        uses: actions/upload-artifact@v3
-        with:
-          name: install-${{ matrix.windows-version }}
-          path: install.7z
