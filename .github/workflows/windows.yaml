@@ -133,6 +133,8 @@ jobs:
           "C:/Program Files/7-Zip/7z.exe" a -t7z -mx9 devel.7z devel
           "C:/Program Files/7-Zip/7z.exe" a -t7z -mx9 ros-bin.7z C:\opt\ros\%ROSDISTRO%\x64\bin
           "C:/Program Files/7-Zip/7z.exe" a -t7z -mx9 Qt-bin.7z %Qt5_Dir%\bin
+        env:
+          ROSDISTRO: ${{ matrix.ROSDISTRO }}
         # "C:/Program Files/7-Zip/7z.exe" a -t7z -mx9 install.7z install
          
       - name: Upload Artifact
